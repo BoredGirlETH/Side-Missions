@@ -132,6 +132,58 @@
             #blueprintReport li {
                 margin-bottom: 5px;
             }
+
+            /* Loading Animation Styles */
+            #loadingAnimation {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #e0e5ec;
+                padding: 20px;
+                border-radius: 20px;
+                box-shadow: 8px 8px 15px #a3b1c6, -8px -8px 15px #ffffff;
+                z-index: 1001;
+                text-align: center;
+            }
+
+            .loading-text {
+                color: #3b82f6;
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .loading-bars {
+                display: flex;
+                justify-content: center;
+                gap: 5px;
+            }
+
+            .loading-bar {
+                width: 8px;
+                height: 40px;
+                background: #3b82f6;
+                border-radius: 4px;
+                animation: loadingAnimation 1s ease-in-out infinite;
+                transform-origin: center;
+                opacity: 0.2;
+            }
+
+            @keyframes loadingAnimation {
+                0% {
+                    transform: scaleY(0.2);
+                    opacity: 0.2;
+                }
+                50% {
+                    transform: scaleY(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scaleY(0.2);
+                    opacity: 0.2;
+                }
+            }
         </style>
     </head>
     <body class="min-h-screen bg-[#e0e5ec] p-4 md:p-8">
@@ -217,6 +269,23 @@
             <div id="blueprintReport" class="neo-morphic">
                 <button type="button" onclick="closeBlueprintReport()" style="position: absolute; top: 10px; right: 10px;">Close</button>
                 <div id="blueprintContent"></div>
+            </div>
+
+            <!-- Loading Animation -->
+            <div id="loadingAnimation">
+                <div class="loading-text">Finding a cure...</div>
+                <div class="loading-bars">
+                    <div class="loading-bar" style="animation-delay: 0s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.1s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.2s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.3s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.4s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.5s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.6s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.7s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.8s"></div>
+                    <div class="loading-bar" style="animation-delay: 0.9s"></div>
+                </div>
             </div>
         </div>
 
@@ -354,6 +423,11 @@
                     return;
                 }
 
+                // Show loading animation
+                document.getElementById('loadingAnimation').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+                closeBlueprintForm();
+
                 // Prepare the prompt for the AI
                 let prompt = `Generate a detailed and well-formatted personalized health blueprint in Markdown format for ${name} living in ${city}, ${country}. `;
                 prompt += `Dietary options: ${dietaryRestrictions || 'no specific options'}. `;
@@ -380,25 +454,26 @@
                     });
 
                     const data = await response.json();
+                    
+                    // Hide loading animation
+                    document.getElementById('loadingAnimation').style.display = 'none';
+                    
                     if (data && data.message) {
                         // Format the blueprint report
                         const formattedBlueprint = formatBlueprint(data.message);
                         document.getElementById('blueprintContent').innerHTML = formattedBlueprint;
                         document.getElementById('blueprintReport').style.display = 'block';
-                        document.getElementById('overlay').style.display = 'block';
                     } else {
                         document.getElementById('blueprintContent').innerHTML = "<p>Error generating blueprint. Please try again.</p>";
                         document.getElementById('blueprintReport').style.display = 'block';
-                        document.getElementById('overlay').style.display = 'block';
                     }
                 } catch (error) {
                     console.error('Error:', error);
+                    // Hide loading animation
+                    document.getElementById('loadingAnimation').style.display = 'none';
                     document.getElementById('blueprintContent').innerHTML = "<p>Error connecting to AI service. Please try again.</p>";
                     document.getElementById('blueprintReport').style.display = 'block';
-                    document.getElementById('overlay').style.display = 'block';
                 }
-
-                closeBlueprintForm();
             }
 
             function formatBlueprint(blueprintText) {
